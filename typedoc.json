@@ -1,0 +1,60 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": [
+    "src/lib/**/*.ts",
+    "src/hooks/**/*.ts",
+    "src/components/**/*.tsx",
+    "src/types/**/*.ts"
+  ],
+  "out": "docs",
+  "exclude": [
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/__tests__/**",
+    "**/node_modules/**",
+    "**/dist/**"
+  ],
+  "excludePrivate": true,
+  "excludeProtected": true,
+  "excludeInternal": true,
+  "includeVersion": true,
+  "readme": "README.md",
+  "name": "PortionPal API Documentation",
+  "theme": "default",
+  "plugin": [],
+  "tsconfig": "tsconfig.app.json",
+  "skipErrorChecking": true,
+  "sort": [
+    "source-order"
+  ],
+  "kindSortOrder": [
+    "Project",
+    "Module",
+    "Namespace",
+    "Enum",
+    "Class",
+    "Interface",
+    "TypeAlias",
+    "Constructor",
+    "Property",
+    "Method",
+    "Accessor",
+    "Function",
+    "Variable"
+  ],
+  "navigation": {
+    "includeCategories": true,
+    "includeGroups": true,
+    "includeFolders": true
+  },
+  "searchInComments": true,
+  "categorizeByGroup": true,
+  "categoryOrder": [
+    "Utilities",
+    "Hooks",
+    "Components",
+    "Types",
+    "*"
+  ]
+}
+

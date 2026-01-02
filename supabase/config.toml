@@ -1,0 +1,8 @@
+project_id = "zdrawtdvdvxpfrksunja"
+
+
+[functions.goal-calculator]
+verify_jwt = true
+
+[functions.nutrition-ai]
+verify_jwt = true

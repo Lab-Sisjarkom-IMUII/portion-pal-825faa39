@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PWA Debug Tool - PortionPal</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+      color: #333;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 16px;
+      padding: 30px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    h1 {
+      color: #667eea;
+      margin-bottom: 10px;
+      font-size: 28px;
+    }
+    .subtitle {
+      color: #666;
+      margin-bottom: 30px;
+      font-size: 14px;
+    }
+    .section {
+      margin-bottom: 30px;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 12px;
+      border-left: 4px solid #667eea;
+    }
+    .section h2 {
+      color: #333;
+      margin-bottom: 15px;
+      font-size: 20px;
+    }
+    .status {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-left: 10px;
+    }
+    .status.ok {
+      background: #10b981;
+      color: white;
+    }
+    .status.error {
+      background: #ef4444;
+      color: white;
+    }
+    .status.warning {
+      background: #f59e0b;
+      color: white;
+    }
+    .info {
+      background: #e0f2fe;
+      border: 1px solid #0ea5e9;
+      border-radius: 8px;
+      padding: 12px;
+      margin-top: 10px;
+      font-size: 14px;
+      color: #0c4a6e;
+    }
+    .button {
+      background: #667eea;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      margin-top: 10px;
+      transition: all 0.2s;
+    }
+    .button:hover {
+      background: #5568d3;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+    .button.secondary {
+      background: #6b7280;
+    }
+    .button.secondary:hover {
+      background: #4b5563;
+    }
+    .log {
+      background: #1e293b;
+      color: #e2e8f0;
+      padding: 15px;
+      border-radius: 8px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      max-height: 200px;
+      overflow-y: auto;
+      margin-top: 10px;
+      white-space: pre-wrap;
+    }
+    .code {
+      background: #f1f5f9;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      color: #c2410c;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔧 PWA Debug Tool</h1>
+    <p class="subtitle">Diagnosa masalah install prompt PortionPal PWA</p>
+
+    <!-- Browser Support -->
+    <div class="section">
+      <h2>1. Browser Support <span id="browser-status" class="status"></span></h2>
+      <div id="browser-info"></div>
+    </div>
+
+    <!-- Service Worker -->
+    <div class="section">
+      <h2>2. Service Worker <span id="sw-status" class="status"></span></h2>
+      <div id="sw-info"></div>
+      <button class="button secondary" onclick="unregisterSW()">Unregister Service Worker</button>
+    </div>
+
+    <!-- Manifest -->
+    <div class="section">
+      <h2>3. Manifest <span id="manifest-status" class="status"></span></h2>
+      <div id="manifest-info"></div>
+    </div>
+
+    <!-- LocalStorage -->
+    <div class="section">
+      <h2>4. LocalStorage <span id="storage-status" class="status"></span></h2>
+      <div id="storage-info"></div>
+      <button class="button secondary" onclick="clearDismissed()">Clear "pwa-install-dismissed"</button>
+    </div>
+
+    <!-- Install Status -->
+    <div class="section">
+      <h2>5. Install Status <span id="install-status" class="status"></span></h2>
+      <div id="install-info"></div>
+    </div>
+
+    <!-- Event Listener -->
+    <div class="section">
+      <h2>6. beforeinstallprompt Event <span id="event-status" class="status warning">Waiting...</span></h2>
+      <div id="event-info">Menunggu event <span class="code">beforeinstallprompt</span>...</div>
+      <div id="event-log" class="log" style="display: none;"></div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="section">
+      <h2>🚀 Quick Actions</h2>
+      <button class="button" onclick="runFullDiagnostic()">Run Full Diagnostic</button>
+      <button class="button secondary" onclick="clearAll()">Clear All & Reload</button>
+    </div>
+  </div>
+
+  <script>
+    let eventFired = false;
+    let deferredPrompt = null;
+
+    // Listen for beforeinstallprompt
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      eventFired = true;
+      deferredPrompt = e;
+      
+      document.getElementById('event-status').textContent = '✅ Fired';
+      document.getElementById('event-status').className = 'status ok';
+      document.getElementById('event-info').innerHTML = `
+        <div class="info">
+          ✅ Event <span class="code">beforeinstallprompt</span> berhasil di-fire!<br>
+          Popup install seharusnya muncul sekarang.
+        </div>
+      `;
+      document.getElementById('event-log').style.display = 'block';
+      document.getElementById('event-log').textContent = JSON.stringify({
+        type: 'beforeinstallprompt',
+        timestamp: new Date().toISOString(),
+        canPrompt: true
+      }, null, 2);
+    });
+
+    // Check browser support
+    function checkBrowser() {
+      const hasSW = 'serviceWorker' in navigator;
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+      const userAgent = navigator.userAgent;
+      const isChrome = /Chrome/.test(userAgent) && /Google Inc/.test(navigator.vendor);
+      const isEdge = /Edg/.test(userAgent);
+      const isSafari = /Safari/.test(userAgent) && !/Chrome/.test(userAgent);
+      const isFirefox = /Firefox/.test(userAgent);
+
+      let browserName = 'Unknown';
+      let supportStatus = 'error';
+      let supportText = 'Browser tidak support PWA install prompt';
+
+      if (isChrome || isEdge) {
+        browserName = isChrome ? 'Chrome' : 'Edge';
+        supportStatus = 'ok';
+        supportText = `${browserName} support PWA install prompt`;
+      } else if (isSafari) {
+        browserName = 'Safari';
+        supportStatus = 'warning';
+        supportText = 'Safari tidak support beforeinstallprompt (gunakan "Add to Home Screen" manual)';
+      } else if (isFirefox) {
+        browserName = 'Firefox';
+        supportStatus = 'error';
+        supportText = 'Firefox tidak support beforeinstallprompt';
+      }
+
+      document.getElementById('browser-status').textContent = supportStatus === 'ok' ? '✅ OK' : supportStatus === 'warning' ? '⚠️ Warning' : '❌ Error';
+      document.getElementById('browser-status').className = `status ${supportStatus}`;
+      document.getElementById('browser-info').innerHTML = `
+        <div>Browser: <strong>${browserName}</strong></div>
+        <div>Service Worker Support: ${hasSW ? '✅' : '❌'}</div>
+        <div>Standalone Mode: ${isStandalone ? '✅ Sudah install' : '❌ Belum install'}</div>
+        <div class="info">${supportText}</div>
+      `;
+    }
+
+    // Check service worker
+    async function checkServiceWorker() {
+      try {
+        const regs = await navigator.serviceWorker.getRegistrations();
+        if (regs.length === 0) {
+          document.getElementById('sw-status').textContent = '❌ Not Found';
+          document.getElementById('sw-status').className = 'status error';
+          document.getElementById('sw-info').innerHTML = `
+            <div class="info">❌ Tidak ada service worker ter-register. Pastikan website sudah di-deploy dengan PWA config.</div>
+          `;
+        } else {
+          document.getElementById('sw-status').textContent = '✅ Registered';
+          document.getElementById('sw-status').className = 'status ok';
+          let info = `<div>Service Workers: <strong>${regs.length}</strong></div>`;
+          regs.forEach((reg, i) => {
+            info += `<div>SW ${i + 1}: ${reg.scope} - ${reg.active ? '✅ Active' : '⏳ Installing'}</div>`;
+          });
+          document.getElementById('sw-info').innerHTML = info;
+        }
+      } catch (e) {
+        document.getElementById('sw-status').textContent = '❌ Error';
+        document.getElementById('sw-status').className = 'status error';
+        document.getElementById('sw-info').innerHTML = `<div class="info">Error: ${e.message}</div>`;
+      }
+    }
+
+    // Check manifest
+    async function checkManifest() {
+      try {
+        const response = await fetch('/manifest.webmanifest');
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const manifest = await response.json();
+        document.getElementById('manifest-status').textContent = '✅ Valid';
+        document.getElementById('manifest-status').className = 'status ok';
+        document.getElementById('manifest-info').innerHTML = `
+          <div>Name: <strong>${manifest.name}</strong></div>
+          <div>Short Name: ${manifest.short_name}</div>
+          <div>Icons: ${manifest.icons?.length || 0}</div>
+          <div>Start URL: ${manifest.start_url}</div>
+        `;
+      } catch (e) {
+        document.getElementById('manifest-status').textContent = '❌ Error';
+        document.getElementById('manifest-status').className = 'status error';
+        document.getElementById('manifest-info').innerHTML = `
+          <div class="info">❌ Manifest tidak bisa diakses: ${e.message}<br>
+          Pastikan file <span class="code">manifest.webmanifest</span> ada di root website.</div>
+        `;
+      }
+    }
+
+    // Check localStorage
+    function checkStorage() {
+      const dismissed = localStorage.getItem('pwa-install-dismissed');
+      if (dismissed) {
+        document.getElementById('storage-status').textContent = '⚠️ Dismissed';
+        document.getElementById('storage-status').className = 'status warning';
+        document.getElementById('storage-info').innerHTML = `
+          <div class="info">⚠️ User sudah pernah dismiss prompt sebelumnya.<br>
+          Ini adalah penyebab paling umum popup tidak muncul!<br>
+          Klik tombol di bawah untuk clear.</div>
+        `;
+      } else {
+        document.getElementById('storage-status').textContent = '✅ Clear';
+        document.getElementById('storage-status').className = 'status ok';
+        document.getElementById('storage-info').innerHTML = `
+          <div>✅ Tidak ada <span class="code">pwa-install-dismissed</span> di localStorage.</div>
+        `;
+      }
+    }
+
+    // Check install status
+    function checkInstall() {
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+      if (isStandalone) {
+        document.getElementById('install-status').textContent = '✅ Installed';
+        document.getElementById('install-status').className = 'status ok';
+        document.getElementById('install-info').innerHTML = `
+          <div class="info">✅ PWA sudah terinstall. Popup tidak akan muncul karena sudah terinstall.</div>
+        `;
+      } else {
+        document.getElementById('install-status').textContent = '❌ Not Installed';
+        document.getElementById('install-status').className = 'status error';
+        document.getElementById('install-info').innerHTML = `
+          <div>❌ PWA belum terinstall. Popup seharusnya muncul jika semua kondisi terpenuhi.</div>
+        `;
+      }
+    }
+
+    // Unregister service worker
+    async function unregisterSW() {
+      try {
+        const regs = await navigator.serviceWorker.getRegistrations();
+        for (const reg of regs) {
+          await reg.unregister();
+        }
+        alert('Service Worker berhasil di-unregister. Halaman akan reload...');
+        location.reload();
+      } catch (e) {
+        alert('Error: ' + e.message);
+      }
+    }
+
+    // Clear dismissed
+    function clearDismissed() {
+      localStorage.removeItem('pwa-install-dismissed');
+      alert('LocalStorage cleared! Halaman akan reload...');
+      location.reload();
+    }
+
+    // Clear all
+    async function clearAll() {
+      // Clear localStorage
+      localStorage.removeItem('pwa-install-dismissed');
+      
+      // Unregister service workers
+      const regs = await navigator.serviceWorker.getRegistrations();
+      for (const reg of regs) {
+        await reg.unregister();
+      }
+      
+      alert('Semua data cleared! Halaman akan reload...');
+      location.reload();
+    }
+
+    // Run full diagnostic
+    function runFullDiagnostic() {
+      checkBrowser();
+      checkServiceWorker();
+      checkManifest();
+      checkStorage();
+      checkInstall();
+      
+      // Wait 10 seconds for event
+      setTimeout(() => {
+        if (!eventFired) {
+          document.getElementById('event-status').textContent = '❌ Not Fired';
+          document.getElementById('event-status').className = 'status error';
+          document.getElementById('event-info').innerHTML = `
+            <div class="info">⚠️ Event <span class="code">beforeinstallprompt</span> belum fire setelah 10 detik.<br>
+            Kemungkinan penyebab:<br>
+            - Browser tidak support<br>
+            - PWA sudah terinstall<br>
+            - Kriteria PWA belum terpenuhi<br>
+            - User engagement terlalu rendah</div>
+          `;
+        }
+      }, 10000);
+    }
+
+    // Run on load
+    window.addEventListener('load', () => {
+      runFullDiagnostic();
+    });
+  </script>
+</body>
+</html>
+
+
+
+

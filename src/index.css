@@ -1,0 +1,243 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Accessibility utilities */
+@layer utilities {
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+
+  .focus\:not-sr-only:focus {
+    position: static;
+    width: auto;
+    height: auto;
+    padding: revert;
+    margin: revert;
+    overflow: visible;
+    clip: auto;
+    white-space: normal;
+  }
+}
+
+/* Definition of the design system - Natural Food Palette
+Color Palette from image:
+- PRIMARY VERDIGRIS: #576238 (RGB: 87 98 56) - Dark muted olive green
+- PRIMARY SHADOW: #8D844D (RGB: 141 132 77) - Lighter olive green/khaki
+- SECONDARY DANDELION: #FFD95E (RGB: 255 217 94) - Bright yellow
+- SECONDARY ECRU WHITE: #F0EADC (RGB: 240 234 220) - Soft creamy off-white
+All colors MUST be HSL. ONLY use these 4 colors and their variations.
+*/
+
+@layer base {
+  :root {
+    /* Base Colors - Natural Food Palette (ONLY from palette) */
+    /* Background - ECRU WHITE (#F0EADC) - Soft creamy off-white */
+    --background: 40 40% 90%;
+
+    /* Foreground - SHADOW darker for text (different from primary) */
+    --foreground: 50 29% 25%;
+
+    /* Card - DANDELION very light with transparency (different from background) */
+    --card: 45 60% 96% / 0.85;
+    --card-foreground: 50 29% 25%;
+
+    --popover: 45 60% 96% / 0.85;
+    --popover-foreground: 50 29% 25%;
+
+    /* Primary - VERDIGRIS (#576238) - Dark muted olive green for buttons */
+    --primary: 75 27% 30%;
+    --primary-foreground: 45 60% 96%;
+
+    /* Secondary - ECRU WHITE medium (different from background and card) */
+    --secondary: 40 40% 92%;
+    --secondary-foreground: 50 29% 25%;
+
+    /* Muted - ECRU WHITE lightest */
+    --muted: 40 35% 94%;
+    --muted-foreground: 50 20% 40%;
+
+    /* Accent - DANDELION (#FFD95E) - Bright yellow for highlights */
+    --accent: 45 100% 68%;
+    --accent-foreground: 75 27% 30%;
+
+    /* Shadow - SHADOW (#8D844D) - Lighter olive green/khaki */
+    --shadow: 50 29% 43%;
+
+    --destructive: 45 100% 68%;
+    --destructive-foreground: 75 27% 30%;
+
+    /* Border - VERDIGRIS very light (different from background, card, and using different color) */
+    --border: 75 20% 85%;
+    --input: 40 35% 94%;
+    --ring: 75 27% 30%;
+
+    /* Rounded corners - natural and soft */
+    --radius: 1.25rem;
+
+    --success: 75 27% 30%;
+    --warning: 45 100% 68%;
+    --info: 50 29% 43%;
+
+    --chart-1: 75 27% 30%;
+    --chart-2: 50 29% 43%;
+    --chart-3: 45 100% 68%;
+    --chart-4: 50 29% 43%;
+    --chart-5: 75 27% 25%;
+
+    /* Natural gradients - ONLY from palette */
+    --gradient-hero: linear-gradient(135deg, 
+      hsl(75 27% 30% / 0.05) 0%, 
+      hsl(50 29% 43% / 0.08) 50%,
+      hsl(45 100% 68% / 0.04) 100%);
+    --gradient-card: linear-gradient(180deg, 
+      hsl(45 60% 96% / 0.85) 0%, 
+      hsl(45 55% 94% / 0.85) 100%);
+    --gradient-primary: linear-gradient(135deg, 
+      hsl(75 27% 30%) 0%, 
+      hsl(50 29% 43%) 100%);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-bold tracking-tight;
+    line-height: 1.2;
+  }
+
+  h1 {
+    @apply text-4xl md:text-5xl lg:text-6xl;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  h2 {
+    @apply text-3xl md:text-4xl;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  h3 {
+    @apply text-2xl md:text-3xl;
+    font-weight: 600;
+  }
+
+  p {
+    line-height: 1.6;
+  }
+}
+
+@layer utilities {
+  /* Solid White Background - Recipe App Image Style (No Glassmorphism) */
+  .glass-effect {
+    @apply bg-white border border-border/20;
+    box-shadow: 
+      0 1px 3px rgba(0, 0, 0, 0.03),
+      0 1px 2px rgba(0, 0, 0, 0.02);
+  }
+
+  .glass-effect-strong {
+    @apply bg-white border border-border/30;
+    box-shadow: 
+      0 2px 8px rgba(0, 0, 0, 0.04),
+      0 1px 3px rgba(0, 0, 0, 0.02);
+  }
+
+  /* Premium Gradients */
+  .gradient-hero {
+    background: var(--gradient-hero);
+  }
+
+  .gradient-card {
+    background: var(--gradient-card);
+  }
+
+  .gradient-primary {
+    background: var(--gradient-primary);
+  }
+
+  /* Ultra Soft Shadows - Recipe App Image Style */
+  .shadow-soft {
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03), 0 1px 1px rgba(0, 0, 0, 0.02);
+  }
+
+  .shadow-elegant {
+    box-shadow: 
+      0 2px 8px rgba(0, 0, 0, 0.04),
+      0 1px 3px rgba(0, 0, 0, 0.02);
+  }
+
+  .shadow-premium {
+    box-shadow: 
+      0 4px 16px rgba(0, 0, 0, 0.06),
+      0 2px 6px rgba(0, 0, 0, 0.03);
+  }
+
+  /* Natural Text Gradient */
+  .text-gradient {
+    @apply bg-gradient-to-r from-primary via-shadow to-accent bg-clip-text text-transparent;
+  }
+
+  /* Smooth Animations */
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-12px);
+    }
+  }
+
+  .animate-pulse-slow {
+    animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  /* Premium Hover Effects */
+  .hover-lift {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px -10px rgba(0, 0, 0, 0.15);
+  }
+
+  /* Premium Card Style */
+  .card-premium {
+    @apply rounded-2xl border border-border/20 bg-card;
+    box-shadow: 
+      0 4px 20px rgba(0, 0, 0, 0.04),
+      0 0 0 1px rgba(0, 0, 0, 0.02);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .card-premium:hover {
+    box-shadow: 
+      0 12px 40px -10px rgba(0, 0, 0, 0.1),
+      0 0 0 1px rgba(0, 0, 0, 0.03);
+    transform: translateY(-2px);
+  }
+}

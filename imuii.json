@@ -1,0 +1,11 @@
+{
+  "name": "portion-pal",
+  "framework": "react",
+  "language": "typescript",
+  "buildCommand": "vite build",
+  "startCommand": "npm run dev",
+  "domain": "portion-pal",
+  "email": "rifqinasution1@gmail.com",
+  "secretKey": "imuii_7b906a87df7c51e1918158b3a5bfb18158f11f7fc762b19b2b2f4082145ede59",
+  "repoUrl": "https://github.com/Lab-Sisjarkom-IMUII/portion-pal-825faa39.git"
+}
