@@ -46,6 +46,7 @@ const removeLovableElements = () => {
       ) {
         // Additional safety: check if it has Lovable-specific attributes
         const hasLovableLink = child.querySelector('a[href*="lovable.dev"]');
+        
         const hasLovableId = child.id?.includes('lovable');
         if (hasLovableLink || hasLovableId) {
           child.remove();
